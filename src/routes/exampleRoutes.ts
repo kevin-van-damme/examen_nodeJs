@@ -10,6 +10,7 @@ import {
   getAllSnippets,
   getSnippetById,
   insertNewSnippet,
+  updateSnippet,
 } from "../controllers/snippetController";
 
 const router = express.Router();
@@ -22,6 +23,7 @@ router
   .post("/snippets", insertNewSnippet)
   .post("/todos", addTodo)
   .delete("/snippets/:id", deleteSnippet)
+  .patch("/snippets/:id", updateSnippet)
   .patch("/todos/:id", updateTodo);
 
 export default router;
