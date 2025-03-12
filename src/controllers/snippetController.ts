@@ -14,3 +14,32 @@ export const getAllSnippets = async (req: Request, res: Response) => {
     }
   }
 };
+
+export const insertNewSnippet = async (req: Request, res: Response) => {
+  try {
+    const encodedCode = Buffer.from(req.body.code).toString("base64");
+    const snippet = (
+      await Snippet.create({ ...req.body, code: encodedCode })
+    ).toObject();
+    const decodedCode = Buffer.from(snippet.code, "base64").toString("utf-8");
+    res
+      .status(201)
+      .json({ status: "Success", data: { ...snippet, code: decodedCode } });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      res.status(500).json({ message: error.message });
+    } else {
+      res.status(500).json({ message: "Something went wrong!" });
+    }
+  }
+};
+
+// Encode
+// const encodedCode = Buffer.from(HIER-DE-SNIPPET).toString("base64");
+// Decode
+// const decodedCode = Buffer.from(HIER-DE-SNIPPET, "base64").toString("utf-8");
+
+// de snippet fetchen...
+
+var date_time = new Date();
+console.log(date_time);

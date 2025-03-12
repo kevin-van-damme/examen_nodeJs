@@ -5,7 +5,10 @@ import {
   addTodo,
   updateTodo,
 } from "../controllers/exampleController";
-import { getAllSnippets } from "../controllers/snippetController";
+import {
+  getAllSnippets,
+  insertNewSnippet,
+} from "../controllers/snippetController";
 
 const router = express.Router();
 
@@ -13,6 +16,7 @@ router
   .get("/test", getHelloWorld)
   .get("/snippets", getAllSnippets)
   .get("/todos", getTodos)
+  .post("/snippets", insertNewSnippet)
   .post("/todos", addTodo)
   .patch("/todos/:id", updateTodo);
 
