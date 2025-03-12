@@ -15,8 +15,42 @@ export const getAllSnippets = async (req: Request, res: Response) => {
   }
 };
 
+export const getSnippetById = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const snippet = await Snippet.findById(id);
+    res.status(200).json(snippet);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      res.status(500).json({ message: error.message });
+    } else {
+      res.status(500).json({ message: "Something went wrong!" });
+    }
+  }
+};
+
+export const deleteSnippet = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const deleteSnip = await Snippet.findByIdAndDelete(id);
+    res.status(200).json({
+      status: "Success",
+      message: `Snippet with id ${id} has been succesfully deleted!`,
+    });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      res.status(500).json({ message: error.message });
+    } else {
+      res.status(500).json({ message: "Something went wrong!" });
+    }
+  }
+};
+
 export const insertNewSnippet = async (req: Request, res: Response) => {
   try {
+    if (req.body.expiresIn) {
+      req.body.expiresIn = req.body.expiresIn / 60;
+    }
     const encodedCode = Buffer.from(req.body.code).toString("base64");
     const snippet = (
       await Snippet.create({ ...req.body, code: encodedCode })
@@ -40,6 +74,3 @@ export const insertNewSnippet = async (req: Request, res: Response) => {
 // const decodedCode = Buffer.from(HIER-DE-SNIPPET, "base64").toString("utf-8");
 
 // de snippet fetchen...
-
-var date_time = new Date();
-console.log(date_time);

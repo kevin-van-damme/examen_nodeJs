@@ -21,7 +21,6 @@ const snippetSchema = new mongoose.Schema(
       type: Array,
       required: true,
     },
-
     expiresIn: {
       type: Number,
       required: false,
