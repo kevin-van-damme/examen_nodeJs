@@ -4,19 +4,39 @@ import { Snippet } from "../models/snippetModel";
 
 export const getAllSnippets = async (req: Request, res: Response) => {
   try {
-    const searchQ = req.query.search as String;
-    const langFilter = searchQ
-      ? { language: { $regex: searchQ, $options: "i" } }
+    const { page, language, tags } = req.query;
+    const langFilter = language
+      ? { language: { $regex: language, $options: "i" } }
       : {};
-    const tagsFilter = searchQ
-      ? { tags: [{ $regex: searchQ, $options: "i" }] }
-      : {};
-    const snippets = await Snippet.find(langFilter);
-    const decodedCode = Buffer.from(snippets.code, "base64").toString("utf-8");
-    if (!snippets) {
+
+    const tagsFilter = tags ? { tags: [{ $regex: tags, $options: "i" }] } : {};
+    const filtSnippets = await Snippet.find(langFilter);
+    const tagsSnippets = await Snippet.find(tagsFilter);
+    const countSnippets = await Snippet.find().countDocuments();
+    const snippets = await Snippet.find()
+      .lean()
+      .limit(10)
+      .skip(page ? 10 * (+page - 1) : 0)
+      .sort({ createdAt: -1 });
+    const pages = Math.ceil(countSnippets / 10);
+    if (page && +page > pages) {
+      res.status(404).json({ message: "Page not found" });
+      return;
+    }
+    const decodedArr = snippets.map((snip) => {
+      return {
+        ...snip,
+        code: Buffer.from(snip.code, "base64").toString("utf-8"),
+      };
+    });
+    if (!decodedArr) {
       res.status(500).json({ message: "There are no snippets" });
     } else {
-      res.status(200).json(decodedCode);
+      res.status(200).json({
+        filtSnippets,
+        tagsSnippets,
+        decodedArr,
+      });
     }
   } catch (error: unknown) {
     if (error instanceof Error) {
