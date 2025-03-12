@@ -12,10 +12,11 @@ export const getAllSnippets = async (req: Request, res: Response) => {
       ? { tags: [{ $regex: searchQ, $options: "i" }] }
       : {};
     const snippets = await Snippet.find(langFilter);
+    const decodedCode = Buffer.from(snippets.code, "base64").toString("utf-8");
     if (!snippets) {
       res.status(500).json({ message: "There are no snippets" });
     } else {
-      res.status(200).json(snippets);
+      res.status(200).json(decodedCode);
     }
   } catch (error: unknown) {
     if (error instanceof Error) {
