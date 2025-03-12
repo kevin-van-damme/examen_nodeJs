@@ -8,16 +8,17 @@ export const getAllSnippets = async (req: Request, res: Response) => {
     const langFilter = language
       ? { language: { $regex: language, $options: "i" } }
       : {};
-
     const tagsFilter = tags ? { tags: [{ $regex: tags, $options: "i" }] } : {};
     const filtSnippets = await Snippet.find(langFilter);
     const tagsSnippets = await Snippet.find(tagsFilter);
+
     const countSnippets = await Snippet.find().countDocuments();
     const snippets = await Snippet.find()
       .lean()
       .limit(10)
       .skip(page ? 10 * (+page - 1) : 0)
       .sort({ createdAt: -1 });
+
     const pages = Math.ceil(countSnippets / 10);
     if (page && +page > pages) {
       res.status(404).json({ message: "Page not found" });
@@ -29,6 +30,7 @@ export const getAllSnippets = async (req: Request, res: Response) => {
         code: Buffer.from(snip.code, "base64").toString("utf-8"),
       };
     });
+
     if (!decodedArr) {
       res.status(500).json({ message: "There are no snippets" });
     } else {
@@ -36,6 +38,10 @@ export const getAllSnippets = async (req: Request, res: Response) => {
         filtSnippets,
         tagsSnippets,
         decodedArr,
+        pagination: {
+          currentPage: page || 1,
+          totalPages: pages,
+        },
       });
     }
   } catch (error: unknown) {
