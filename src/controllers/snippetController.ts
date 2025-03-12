@@ -4,7 +4,14 @@ import { Snippet } from "../models/snippetModel";
 
 export const getAllSnippets = async (req: Request, res: Response) => {
   try {
-    const snippets = await Snippet.find();
+    const searchQ = req.query.search as String;
+    const langFilter = searchQ
+      ? { language: { $regex: searchQ, $options: "i" } }
+      : {};
+    const tagsFilter = searchQ
+      ? { tags: [{ $regex: searchQ, $options: "i" }] }
+      : {};
+    const snippets = await Snippet.find(langFilter);
     if (!snippets) {
       res.status(500).json({ message: "There are no snippets" });
     } else {
